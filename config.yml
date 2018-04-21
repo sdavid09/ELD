@@ -1,0 +1,15 @@
+s3:
+    access_key_id: 'AKIAJJWO4E6N6SOHE47A'
+    secret_access_key: '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'
+    bucket_name: 'eldimage'
+
+image_settings:
+    horizontal_res: 640
+    vertical_res: 480
+    file_name: 'face'
+    file_extension: '.jpg'
+    folder_name: 'Building/entrance/img_entering'
+    awb_mode: 'auto'
+    photo_interval: 10
+
+debug: true

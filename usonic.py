@@ -9,7 +9,7 @@ from datetime import datetime
 db=MySQLdb.connect(host="jjsample.cnfdilkrunc8.us-west-2.rds.amazonaws.com",port=3306,user="justin",passwd="justin12",db="sample1")
 
 dbase=db.cursor()
-cnt=0
+piccnt=0
 
 GPIO.setmode(GPIO.BCM)
 GPIO_TRIGGER = 17
@@ -25,7 +25,7 @@ GPIO.setup(GPIO_ECHO, GPIO.IN)
 GPIO.setup(GPIO_TRIGGER2, GPIO.OUT)
 GPIO.setup(GPIO_ECHO2, GPIO.IN)
 count = 0
-RANGE=100 # distance in cm
+RANGE=60 # distance in cm
 PICSPATH = "/home/pi/Development/pics/"
  
 def distance():
@@ -74,11 +74,11 @@ if __name__ == '__main__':
             dist2 = distance2()
             pir = GPIO.input(GPIO_PIR)
             
-            print "Distance1: %0.1f Distance2: %0.1f" %(dist, dist2)
+           # print "Distance1: %0.1f Distance2: %0.1f" %(dist, dist2)
             #print "PIR: %s PIR2 %s "  %(pir, pir2)
             if dist2 < dist:
                 if pir and (dist2 < RANGE and dist > RANGE):
-                    redo=5;
+                    redo=4;
                     while redo > 0:
                         dist = distance()
                         if dist <= RANGE:
@@ -92,18 +92,19 @@ if __name__ == '__main__':
                                 print "CANNOT EXECUTE"
                                 db.rollback()
                             with picamera.PiCamera() as cam:
-                                cam.resolution=(1280,720)
-                                #cam.capture(PICSPATH + str(now) + ".jpg")
-                                #cam.capture(PICSPATH + "user"+str(cnt) + ".jpg")
-                                #os.system("scp -i /home/pi/newace.pem /home/pi/Development/pics/ ec2-user@ec2-54-191-39-89.us-west-2.compute.amazonaws.com:/var/www/html/img/"
+                                cam.resolution=(1280, 720)
+                                cam.capture(PICSPATH + str(piccnt) + ".jpg")
+                                #cam.capture(PICSPATH + "test" + ".jpg")
+                               # os.system("scp -i /home/pi/newace.pem /home/pi/Development/pics/%s.jpg ec2-user@ec2-54-191-39-89.us-west-2.compute.amazonaws.com:/var/www/html/img/" %(str(now)))
+                            piccnt+=1
                             print "Picture Taken!"
-                            cnt+=1
                             break
                         redo -=1
-                        time.sleep(0.15)
+                        #time.sleep(0.20)
+                        time.sleep(0.25)
             if dist < dist2:
                 if pir and (dist < RANGE and dist2 > RANGE):
-                    redo=5
+                    redo=4
                     while redo > 0:
                         dist2 = distance2()
                         if dist2 <= RANGE:
@@ -111,8 +112,7 @@ if __name__ == '__main__':
                             count-=1
                             now= datetime.now()
                             try:
-                                mic=1
-                                #dbase.execute("""INSERT INTO  main_door VALUES ( %s, %s)""",( now , count))
+                                dbase.execute("""INSERT INTO  main_door VALUES ( %s, %s)""",( now , count))
                                 #dbase.execute("""INSERT INTO  RM_1 VALUES ( %s,%s, %s)""",( now ,mic, count))
                                 db.commit()
                             except:
@@ -120,12 +120,15 @@ if __name__ == '__main__':
                                 db.rollback()
                             break
                         redo -=1
-                        time.sleep(0.15)
+                        #time.sleep(0.20)
+                        time.sleep(0.25)
             if temp != count:
                 now= datetime.now()
                 print "%s Count:%s " %( str(now), count)
-            time.sleep(0.10)
+            time.sleep(0.1)
         # Reset by pressing CTRL + C except KeyboardInterrupt:
-    except:
-        GPIO.cleanup()
+    except Exception as e:
+        print e
         print("Exiting counter!")
+    finally:
+        GPIO.cleanup()
