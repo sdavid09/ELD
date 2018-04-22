@@ -4,7 +4,23 @@ import time
 import cv2
 import sys
 import imutils
+import os
+import tinys3
+import yaml
+import datetime
 
+with open("config.yml", 'r') as ymlfile:
+    cfg = yaml.load(ymlfile)
+
+image_width = cfg['image_settings']['horizontal_res']
+image_height = cfg['image_settings']['vertical_res']
+file_extension = cfg['image_settings']['file_extension']
+file_name = cfg['image_settings']['file_name']
+photo_interval = cfg['image_settings']['photo_interval'] # Interval between photo (in seconds)
+image_folder = cfg['image_settings']['folder_name']
+
+if not os.path.exists(image_folder):
+    os.makedirs(image_folder)
 # Get user supplied values
 #cascPath = sys.argv[1]
 
@@ -14,9 +30,9 @@ face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 #eye_cascade = cv2.CascadeClassifier('haarcascades/haarcascade_eye.xml')
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
-camera.resolution = (320, 240)
+camera.resolution = (640, 480)
 camera.framerate = 30
-rawCapture = PiRGBArray(camera, size=(320, 240))
+rawCapture = PiRGBArray(camera, size=(640, 480))
 
 # allow the camera to warmup
 time.sleep(0.1)
@@ -34,12 +50,27 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     gray,
     scaleFactor=1.1,
     minNeighbors=5,
-    minSize=(10, 10),
+    minSize=(30, 30),
     flags = cv2.cv.CV_HAAR_SCALE_IMAGE
     )
     print time.time()*1000.0-lastTime," Found {0} faces!".format(len(faces))
     lastTime = time.time()*1000.0
     # Draw a rectangle around the faces
+    if (len(faces) > 0):
+        st = datetime.datetime.utcnow()
+        filepath = image_folder + '/' + "face" + str(st) + file_extension 
+        cv2.imwrite(filepath, image)
+        if cfg['debug'] == True:
+            print '[debug] Uploading ' + filepath + ' to s3'
+
+        # Upload to S3
+        conn = tinys3.Connection(cfg['s3']['access_key_id'], cfg['s3']['secret_access_key'])
+        f = open(filepath, 'rb')
+        conn.upload(filepath, f, cfg['s3']['bucket_name'],
+                   headers={
+                   'x-amz-meta-cache-control': 'max-age=60'
+                   })
+        
     for (x, y, w, h) in faces:
         #cv2.circle(image, (x+w/2, y+h/2), int((w+h)/3), (255, 255, 255), 1)
         cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
