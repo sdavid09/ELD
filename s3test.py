@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from datetime import datetime
+import datetime
+import time
 from time import sleep
 import picamera
 import os
@@ -36,7 +37,8 @@ while True:
     
     
     # Build filename string
-    filepath = image_folder + '/' + file_name + str(cnt) + file_extension 
+    st = datetime.datetime.utcnow()
+    filepath = image_folder + '/' + file_name + str(st) + file_extension 
     #filepath = file_name + str(cnt) + file_extension 
     cnt +=1
 
