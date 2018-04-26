@@ -54,10 +54,17 @@ def lambda_handler(event, context):
    
 
         # Print response to console
-       # if response[1][0]['Similarity'] > 90 :# print only similarity 
-       #     print "MATCH!"   # 
-       
-       
+ 
+        #s3 = boto3.resource('s3')
+        #copy_source = {
+        #    'Bucket': 'eldimage',
+        #    'Key': 'test.jpg'
+        #    }
+        #dest_source = {
+        #    'Bucket': 'mybucket',
+        #    'Key': 'test.jpg'
+        #    }
+        #s3.meta.client.copy(copy_source, bucket, 'Building/entrance/img_entering/lol.jpg')
         imgs=[]
         val=[]
         s3 = boto3.resource('s3')
@@ -66,18 +73,23 @@ def lambda_handler(event, context):
                 imgs.append(obj.key)
       
         imgs.remove("Building/entrance/img_entering/") # remove home path so face comparison wont try to compare
-        #val = imgs[:]
         #print imgs # list of all keys
-       # filter(lambda x: response[1][0]['Similarity'] > 90)
+    
         val = list( map ( lambda x: x.encode('utf8'), imgs)) # convert list of unicode to string
         for x in val:
             response = index_faces('eldimage', 'test.jpg', x)
+            #response = "TEST"
             print response
             try:
-                if response[1][0]['Similarity'] > 90 :# print only similarity 
+                if response[1][0]['Similarity'] > 70 :# print only similarity 
                     print "MATCH!" 
             except:
                 print "NOT MATCH!"# 
+                
+                #print "MATCH!" 
+            #else:
+               # print "NOT MATCH!"# 
+            
        
         
         #return response
