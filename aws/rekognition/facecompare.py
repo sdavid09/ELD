@@ -3,8 +3,8 @@ import boto3
 BUCKET = "amazon-rekognition"
 KEY_SOURCE = "test.jpg"
 KEY_TARGET = "test2.jpg"
-ACCESS_ID = 'AKIAJJWO4E6N6SOHE47A'
-ACCESS_KEY = 'i+3gHE63hRyMyaJyZVn0SgoLlz7xvmnNxdU4ktem'
+ACCESS_ID = ''
+ACCESS_KEY = ''
 
 def compare_faces(bucket, key, bucket_target, key_target, threshold=80, region="us-east-1"):
     #rekognition = boto3.client("rekognition", region)
