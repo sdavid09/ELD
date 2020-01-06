@@ -1,6 +1,6 @@
 s3:
-    access_key_id: 'AKIAJJWO4E6N6SOHE47A'
-    secret_access_key: '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'
+    access_key_id: ''
+    secret_access_key: ''
     bucket_name: 'eldimage'
 
 image_settings:
